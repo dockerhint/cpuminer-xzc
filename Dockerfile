@@ -1,25 +1,16 @@
-#
-# Dockerfile for cpuminer
-# usage: docker run creack/cpuminer --url xxxx --user xxxx --pass xxxx
-# ex: docker run creack/cpuminer --url stratum+tcp://ltc.pool.com:80 --user creack.worker1 --pass abcdef
-#
-#
+FROM ubuntu
 
-FROM		ubuntu:12.10
-MAINTAINER	Guillaume J. Charmes <guillaume@charmes.net>
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    clang automake autoconf pkg-config libcurl4-openssl-dev libjansson-dev libssl-dev libgmp-dev clang git make nano screen && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN		apt-get update -qq
+RUN git clone https://github.com/dockerhint/cpuminer-xzc.git /cpuminer && \
+    cd /cpuminer && \
+    ./build.sh
 
-RUN		apt-get install -qqy automake
-RUN		apt-get install -qqy libcurl4-openssl-dev
-RUN		apt-get install -qqy git
-RUN		apt-get install -qqy make
+WORKDIR /cpuminer
 
-RUN		git clone https://github.com/pooler/cpuminer
-
-RUN		cd cpuminer && ./autogen.sh
-RUN		cd cpuminer && ./configure CFLAGS="-O3"
-RUN		cd cpuminer && make
-
-WORKDIR		/cpuminer
 ENTRYPOINT	["./cpuminer"]
+
+CMD ["--help"]
